@@ -5,7 +5,8 @@ CC = cc
 AS = as
 LD = ld
 
-CFLAGS = -g -O2 -Wall -Wextra -Wcast-qual -Wc++-compat
+# CFLAGS = -g -O2 -DNDEBUG -Wall -Wextra -Wcast-qual -Wc++-compat
+CFLAGS = -O2 -DNDEBUG -Wall -Wextra -Wcast-qual -Wc++-compat
 
 DYNAMIC_LINKER ?= /usr/lib64/ld-linux-x86-64.so.2
 LDFLAGS = -dynamic-linker $(DYNAMIC_LINKER) -lc -z noexecstack
@@ -31,6 +32,12 @@ $(BUILD_DIR)/hex-to-bin.s: src/hex-to-bin.c | $(BUILD_DIR)
 $(BUILD_DIR)/hex-to-bin.o: $(BUILD_DIR)/hex-to-bin.s
 	$(AS) -o $@ $<
 
+$(BUILD_DIR)/hex-to-bin-opts.s: src/hex-to-bin-opts.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -S -o $@ $<
+
+$(BUILD_DIR)/hex-to-bin-opts.o: $(BUILD_DIR)/hex-to-bin-opts.s
+	$(AS) -o $@ $<
+
 $(BUILD_DIR)/hex-to-bin-main.s: src/hex-to-bin-main.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -S -o $@ $<
 
@@ -39,6 +46,7 @@ $(BUILD_DIR)/hex-to-bin-main.o: $(BUILD_DIR)/hex-to-bin-main.s
 
 $(BUILD_DIR)/hex-to-bin: \
 		$(BUILD_DIR)/hex-to-bin.o \
+		$(BUILD_DIR)/hex-to-bin-opts.o \
 		$(BUILD_DIR)/hex-to-bin-main.o \
 		$(BUILD_DIR)/start.o
 	$(LD) $(LDFLAGS) -o $@ $^
